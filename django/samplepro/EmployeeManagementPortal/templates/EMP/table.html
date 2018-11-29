@@ -1,0 +1,28 @@
+{% extends "EMP/header.html" %}
+
+{% block content %}
+<div class="large-12 columns viewTable">
+   <table>
+       <tr>
+           <th>Name</th>
+           <th>Email ID</th>
+           <th>Mobile Number</th>
+       </tr>
+       {% for item in table %}
+       <tr>
+           <td>{{ item.username }}</td>
+           <td>{{ item.emailId }}</td>
+           <td>{{ item.mobileNumber }}</td>
+           <td><a href="/EMP/{{ item.id }}/delete">Delete</a></td>
+           <td><a href="/EMP/{{ item.id }}/update">Update</a></td>
+       </tr>
+       {% endfor %}
+   </table>
+</div>
+<p style="text-align:center; color:red;"class="val3"></p>
+
+
+
+
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "EMP/header.html" %}
+
+{% block content %}
+ <div class="row">
+     <h1 style="text-align:center;">Add Employee</h1>
+     <form id="SignupForm" method="post">
+           {% csrf_token %}
+           <table border="0">
+            {{ form.as_table }}
+          </table>
+           <input type ="submit" class="addEmp" value="Submit">
+     </form>
+ </div>
+{% endblock %}
