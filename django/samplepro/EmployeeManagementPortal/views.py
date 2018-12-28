@@ -20,9 +20,22 @@ def showform(request):
     return render(request,'EMP/addEmpl.html')
 
 def showTable(request):
-    table = AddEmployee.objects.all()
-    context={'table':table}
-    return render(request,'EMP/table.html', context)
+    if(AddEmployee.objects.count()):
+        table = AddEmployee.objects.all()
+        paginator = Paginator(table,2)
+        page = request.GET.get('page')
+        try:
+           emp_list = paginator.page(page)
+        except PageNotAnInteger:
+           emp_list=paginator.page(1)
+        except EmptyPage:
+           emp_list = paginator.page(paginator.num_pages)
+
+        context={'table':emp_list}
+        return render(request,'EMP/table.html', context)
+    else:
+        context={'records':"no records found"}
+        return render(request,'EMP/table.html',context)
 def download(request):
     return render(request,'EMP/download.html')
 
@@ -31,10 +44,15 @@ def searchEmployee(request):
 
 def empsearch(request):
     item = request.GET['searchtext']
-    print item
     table = AddEmployee.objects.all()
-    context = {'table': table, 'item': item}
-    return render(request, 'EMP/searchdata.html', context)
+    data=AddEmployee.objects.filter(Q(username__icontains=item) | Q(emailId__icontains=item) | Q(mobileNumber__icontains=item))
+    if item=="":
+        return HttpResponseRedirect("/EMP/search/")
+    if len(data) == 0:
+        return render(request,'EMP/search.html',{'msg':"no records found"})
+
+    context = {'table': data, 'item': item,'p':'p'}
+    return render(request, 'EMP/search.html', context)
 
 def objectDelete(request, item_id):
     object = get_object_or_404(AddEmployee, pk=item_id)
@@ -59,28 +77,41 @@ def uploadCSV(request):
     prompt= {
         'order':'Order of the CSV should be Username,EmailId,MobileNumber'
     }
+
     if(request.method=='GET'):
         return render(request,template,prompt)
-    csv_file=request.FILES["file"]
-    if not csv_file.name.endswith('.csv'):
-        messages.error(request,'This is not acsv file')
-    data_set=csv_file.read().decode('UTF-8')
-    io_string =io.StringIO(data_set)
-    next(io_string)
-    for column in csv.reader(io_string,delimiter=','):
-        try:
+    try:
+        csv_file=request.FILES["file"]
+        if not csv_file.name.endswith('.csv'):
+            return render(request,template,{'msg':"This is not a csv file"})
+        data_set=csv_file.read().decode('UTF-8')
+        io_string =io.StringIO(data_set)
+        next(io_string)
+        i=0
+        msg=[]
+        for column in csv.reader(io_string,delimiter=','):
+
             emp = AddEmployee(
             username=column[0],
             emailId=column[1],
             mobileNumber=column[2]
 
-        )
+            )
 
-            emp.save()
-        except:
-            print("email already exist")
-    context={}
-    return render(request,template,context)
+            try:
+                emp.save()
+            except:
+                mail ="Existing emails"
+                msg.append(column[1])
+
+        context = {'msg':msg , 'mail':mail}
+        return render(request, template,context)
+
+
+    except:
+        print("no file")
+    return render(request, template)
+
 
 def downloadCSV(request):
     items=AddEmployee.objects.all()
