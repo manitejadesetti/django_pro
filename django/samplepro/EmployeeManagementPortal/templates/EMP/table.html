@@ -1,28 +1,49 @@
 {% extends "EMP/header.html" %}
 
 {% block content %}
-<div class="large-12 columns viewTable">
-   <table>
-       <tr>
-           <th>Name</th>
-           <th>Email ID</th>
-           <th>Mobile Number</th>
-       </tr>
-       {% for item in table %}
-       <tr>
-           <td>{{ item.username }}</td>
-           <td>{{ item.emailId }}</td>
-           <td>{{ item.mobileNumber }}</td>
-           <td><a href="/EMP/{{ item.id }}/delete">Delete</a></td>
-           <td><a href="/EMP/{{ item.id }}/update">Update</a></td>
-       </tr>
-       {% endfor %}
-   </table>
+<div class="row">
+<div class="large-9 columns">
+   {% if records == "no records found" %}
+      <p style="text-align:center; color:red; margin-top:2%;" >{{ records }}</p>
+    {% else %}
+       <table align="center" class="viewtable">
+           <tr>
+               <th>Name</th>
+               <th>Email ID</th>
+               <th>Mobile Number</th>
+           </tr>
+           {% for item in table %}
+           <tr>
+               <td>{{ item.username }}</td>
+               <td>{{ item.emailId }}</td>
+               <td>{{ item.mobileNumber }}</td>
+               <td><a class="button tiny" id="{{ item.id }}" onclick="ajaxDelete(this);">Delete</a></td>
+               <td><a class="button tiny" href="/EMP/{{ item.id }}/update">Update</a></td>
+           </tr>
+           {% endfor %}
+       </table>
+    {% endif %}
 </div>
 <p style="text-align:center; color:red;"class="val3"></p>
 
+</div>
+<div class="row">
+<div class="pagination large-push-4 large-8 columns">
+    <div class="pagination">
+        {% if table.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ table.previous_page_number }}">previous</a>
+        {% endif %}
 
+        <span class="current">
+            Page {{ table.number }} of {{ table.paginator.num_pages }}.
+        </span>
 
-
+        {% if table.has_next %}
+            <a href="?page={{ table.next_page_number }}">next</a>
+            <a href="?page={{ table.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </div>
+</div>
 </div>
 {% endblock %}
